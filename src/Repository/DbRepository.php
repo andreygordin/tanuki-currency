@@ -9,20 +9,20 @@ declare(strict_types=1);
 
 namespace TanukiCurrency\Repository;
 
-use TanukiCurrency\Entity\Code;
 use TanukiCurrency\Entity\Currency;
+use TanukiCurrency\Entity\CurrencyState;
 use TanukiCurrency\Entity\Rate;
 
 class DbRepository implements RepositoryInterface
 {
-    public function find(Code $code): Currency
+    public function find(Currency $currency): CurrencyState
     {
         // @todo Implement retrieving the real data
 
-        return new Currency($code, new Rate(mt_rand(1, 500) / 100));
+        return new CurrencyState($currency, new Rate(mt_rand(1, 500) / 100));
     }
 
-    public function save(Currency $currency): void
+    public function save(CurrencyState $currencyState): void
     {
         // @todo Implement saving the data
     }

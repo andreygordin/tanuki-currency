@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace TanukiCurrency\Handler;
 
-use TanukiCurrency\Entity\Code;
 use TanukiCurrency\Entity\Currency;
+use TanukiCurrency\Entity\CurrencyState;
 use TanukiCurrency\Exception\CurrencyNotFoundException;
 use TanukiCurrency\Repository\RepositoryInterface;
 
@@ -32,7 +32,7 @@ class Handler
         $this->nextHandler = $nextHandler;
     }
 
-    public function retrieveCurrency(Code $code): Currency
+    public function retrieveCurrency(Currency $code): CurrencyState
     {
         try {
             $currency = $this->findCurrency($code);
@@ -47,12 +47,12 @@ class Handler
         return $currency;
     }
 
-    private function findCurrency(Code $code): Currency
+    private function findCurrency(Currency $code): CurrencyState
     {
         return $this->repository->find($code);
     }
 
-    private function saveCurrency(Currency $currency): void
+    private function saveCurrency(CurrencyState $currency): void
     {
         $this->repository->save($currency);
     }

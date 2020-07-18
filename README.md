@@ -25,15 +25,15 @@ composer require andreygordin/tanuki-currency
 Пример использования:
 
 ```php
-use TanukiCurrency\Entity\Code;
+use TanukiCurrency\Entity\Currency;
 use TanukiCurrency\Repository\CacheRepository;
 use TanukiCurrency\Repository\DbRepository;
 use TanukiCurrency\Repository\HttpRepository;
 use TanukiCurrency\Handler\HandlerBuilder;
 
-$cacheRepository = new CacheRepository;
-$dbRepository = new DbRepository;
-$httpRepository = new HttpRepository;
+$cacheRepository = new CacheRepository();
+$dbRepository = new DbRepository();
+$httpRepository = new HttpRepository();
 
 $handler = (new HandlerBuilder())
 	->with($cacheRepository)
@@ -41,9 +41,9 @@ $handler = (new HandlerBuilder())
 	->with($httpRepository)
 	->build();
 
-$currency = $handler->retrieveCurrency(new Code('RUB'));
+$currencyState = $handler->retrieveCurrency(new Currency('RUB'));
 
-echo $currency->rate()->value();
+echo $currencyState->rate()->value();
 ```
 
 ## Как проверить

@@ -10,8 +10,8 @@ declare(strict_types=1);
 namespace TanukiCurrency\Test\Unit\Handler;
 
 use PHPUnit\Framework\TestCase;
-use TanukiCurrency\Entity\Code;
 use TanukiCurrency\Entity\Currency;
+use TanukiCurrency\Entity\CurrencyState;
 use TanukiCurrency\Entity\Rate;
 use TanukiCurrency\Exception\CurrencyNotFoundException;
 use TanukiCurrency\Exception\NoHandlersException;
@@ -26,7 +26,7 @@ class HandlerBuilderTest extends TestCase
         $cacheRepository
             ->expects($this->once())
             ->method('find')->willReturn(
-                $currencyFound = new Currency(new Code('RUB'), new Rate(0.014))
+                $currencyFound = new CurrencyState(new Currency('RUB'), new Rate(0.014))
             );
         $cacheRepository->expects($this->never())->method('save');
 
@@ -44,7 +44,7 @@ class HandlerBuilderTest extends TestCase
             ->with($httpRepository)
             ->build();
 
-        $currencyRetrieved = $handler->retrieveCurrency(new Code('RUB'));
+        $currencyRetrieved = $handler->retrieveCurrency(new Currency('RUB'));
         self::assertSame($currencyFound, $currencyRetrieved);
     }
 
@@ -68,7 +68,7 @@ class HandlerBuilderTest extends TestCase
         $httpRepository
             ->expects($this->once())
             ->method('find')->willReturn(
-                $currencyFound = new Currency(new Code('RUB'), new Rate(0.014))
+                $currencyFound = new CurrencyState(new Currency('RUB'), new Rate(0.014))
             );
         $httpRepository->expects($this->never())->method('save');
 
@@ -78,7 +78,7 @@ class HandlerBuilderTest extends TestCase
             ->with($httpRepository)
             ->build();
 
-        $currencyRetrieved = $handler->retrieveCurrency(new Code('RUB'));
+        $currencyRetrieved = $handler->retrieveCurrency(new Currency('RUB'));
         self::assertSame($currencyFound, $currencyRetrieved);
     }
 
@@ -111,7 +111,7 @@ class HandlerBuilderTest extends TestCase
             ->build();
 
         $this->expectException(CurrencyNotFoundException::class);
-        $handler->retrieveCurrency(new Code('RUB'));
+        $handler->retrieveCurrency(new Currency('RUB'));
     }
 
     public function testNoHandlers(): void

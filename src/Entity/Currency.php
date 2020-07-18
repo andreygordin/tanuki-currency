@@ -9,31 +9,28 @@ declare(strict_types=1);
 
 namespace TanukiCurrency\Entity;
 
+use InvalidArgumentException;
+
 class Currency
 {
     /**
-     * @var Code
+     * @var string
      */
     private $code;
 
-    /**
-     * @var Rate
-     */
-    private $rate;
-
-    public function __construct(Code $code, Rate $rate)
+    public function __construct(string $code)
     {
+        if (mb_strlen($code) !== 3) {
+            throw new InvalidArgumentException('Currency code must contain exactly three characters');
+        }
+
+        $code = mb_strtoupper($code);
+
         $this->code = $code;
-        $this->rate = $rate;
     }
 
-    public function code(): Code
+    public function code(): string
     {
         return $this->code;
-    }
-
-    public function rate(): Rate
-    {
-        return $this->rate;
     }
 }
