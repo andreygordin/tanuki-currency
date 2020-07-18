@@ -7,18 +7,19 @@
 
 declare(strict_types=1);
 
-namespace TanukiCurrency\Test\Unit\Handler;
+namespace TanukiCurrency\Test\Unit\Repository;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use TanukiCurrency\Entity\Currency;
 use TanukiCurrency\Entity\CurrencyState;
 use TanukiCurrency\Entity\Rate;
 use TanukiCurrency\Exception\CurrencyNotFoundException;
-use TanukiCurrency\Exception\NoHandlersException;
-use TanukiCurrency\Handler\HandlerBuilder;
+use TanukiCurrency\Exception\ReadOnlyException;
+use TanukiCurrency\Repository\ChainRepository;
 use TanukiCurrency\Repository\RepositoryInterface;
 
-class HandlerBuilderTest extends TestCase
+class ChainRepositoryTest extends TestCase
 {
     public function testFoundInFirstRepository(): void
     {
@@ -26,7 +27,7 @@ class HandlerBuilderTest extends TestCase
         $cacheRepository
             ->expects($this->once())
             ->method('find')->willReturn(
-                $currencyFound = new CurrencyState(new Currency('RUB'), new Rate(0.014))
+                $currencyStateFound = new CurrencyState(new Currency('RUB'), new Rate(0.014))
             );
         $cacheRepository->expects($this->never())->method('save');
 
@@ -38,14 +39,14 @@ class HandlerBuilderTest extends TestCase
         $httpRepository->expects($this->never())->method('find');
         $httpRepository->expects($this->never())->method('save');
 
-        $handler = (new HandlerBuilder())
-            ->with($cacheRepository)
-            ->with($dbRepository)
-            ->with($httpRepository)
-            ->build();
+        $chainRepository = new ChainRepository(
+            $cacheRepository,
+            $dbRepository,
+            $httpRepository
+        );
 
-        $currencyRetrieved = $handler->retrieveCurrency(new Currency('RUB'));
-        self::assertSame($currencyFound, $currencyRetrieved);
+        $currencyStateRetrieved = $chainRepository->find(new Currency('RUB'));
+        self::assertSame($currencyStateFound, $currencyStateRetrieved);
     }
 
     public function testFoundInLastRepository(): void
@@ -68,18 +69,18 @@ class HandlerBuilderTest extends TestCase
         $httpRepository
             ->expects($this->once())
             ->method('find')->willReturn(
-                $currencyFound = new CurrencyState(new Currency('RUB'), new Rate(0.014))
+                $currencyStateFound = new CurrencyState(new Currency('RUB'), new Rate(0.014))
             );
         $httpRepository->expects($this->never())->method('save');
 
-        $handler = (new HandlerBuilder())
-            ->with($cacheRepository)
-            ->with($dbRepository)
-            ->with($httpRepository)
-            ->build();
+        $chainRepository = new ChainRepository(
+            $cacheRepository,
+            $dbRepository,
+            $httpRepository
+        );
 
-        $currencyRetrieved = $handler->retrieveCurrency(new Currency('RUB'));
-        self::assertSame($currencyFound, $currencyRetrieved);
+        $currencyStateRetrieved = $chainRepository->find(new Currency('RUB'));
+        self::assertSame($currencyStateFound, $currencyStateRetrieved);
     }
 
     public function testNotFound(): void
@@ -104,19 +105,29 @@ class HandlerBuilderTest extends TestCase
             ->method('find')->willThrowException(new CurrencyNotFoundException());
         $httpRepository->expects($this->never())->method('save');
 
-        $handler = (new HandlerBuilder())
-            ->with($cacheRepository)
-            ->with($dbRepository)
-            ->with($httpRepository)
-            ->build();
+        $chainRepository = new ChainRepository(
+            $cacheRepository,
+            $dbRepository,
+            $httpRepository
+        );
 
         $this->expectException(CurrencyNotFoundException::class);
-        $handler->retrieveCurrency(new Currency('RUB'));
+        $chainRepository->find(new Currency('RUB'));
     }
 
-    public function testNoHandlers(): void
+    public function testNoRepositories(): void
     {
-        $this->expectException(NoHandlersException::class);
-        (new HandlerBuilder())->build();
+        $this->expectException(InvalidArgumentException::class);
+        new ChainRepository();
+    }
+
+    public function testSaving(): void
+    {
+        $internalRepository = $this->createMock(RepositoryInterface::class);
+        $chainRepository = new ChainRepository($internalRepository);
+        $currencyState = $this->createMock(CurrencyState::class);
+
+        $this->expectException(ReadOnlyException::class);
+        $chainRepository->save($currencyState);
     }
 }

@@ -27,21 +27,17 @@ composer require andreygordin/tanuki-currency
 ```php
 use TanukiCurrency\Entity\Currency;
 use TanukiCurrency\Repository\CacheRepository;
+use TanukiCurrency\Repository\ChainRepository;
 use TanukiCurrency\Repository\DbRepository;
 use TanukiCurrency\Repository\HttpRepository;
-use TanukiCurrency\Handler\HandlerBuilder;
 
-$cacheRepository = new CacheRepository();
-$dbRepository = new DbRepository();
-$httpRepository = new HttpRepository();
+$chainRepository = new ChainRepository(
+	new CacheRepository(),
+	new DbRepository(),
+	new HttpRepository()
+);
 
-$handler = (new HandlerBuilder())
-	->with($cacheRepository)
-	->with($dbRepository)
-	->with($httpRepository)
-	->build();
-
-$currencyState = $handler->retrieveCurrency(new Currency('RUB'));
+$currencyState = $chainRepository->find(new Currency('RUB'));
 
 echo $currencyState->rate()->value();
 ```
@@ -74,7 +70,7 @@ composer test
 
 ## Что еще можно было бы сделать
 
-1. Сейчас классы всех трех репозиториев возвращают фейковые данные и ничего не сохраняют. Следуюшим шагом было бы настроить каждый репозиторий под работу с определенным типом хранилища.
+1. Сейчас классы трех внутренних репозиториев возвращают фейковые данные и по факту ничего не сохраняют. Следуюшим шагом было бы настроить каждый репозиторий под работу с определенным типом хранилища.
 Для работы с кешем существует PSR-6: можно было бы ```CacheRepository``` сделать зависимым от ```Psr\Cache\CacheItemPoolInterface``` и использовать такой клиент для получения-сохранения данных.
 Для работы с HTTP есть PSR-17 и PSR-18: в классе ```HttpRepository``` можно было бы сделать зависимости от ```Psr\Http\Message\RequestFactoryInterface``` и ```Psr\Http\Client\ClientInterface```.
 Для работы с базой в PSR ничего нет, тут можно было бы написать свой интерфейс.

@@ -12,6 +12,7 @@ namespace TanukiCurrency\Repository;
 use TanukiCurrency\Entity\Currency;
 use TanukiCurrency\Entity\CurrencyState;
 use TanukiCurrency\Entity\Rate;
+use TanukiCurrency\Exception\ReadOnlyException;
 
 class HttpRepository implements RepositoryInterface
 {
@@ -24,5 +25,6 @@ class HttpRepository implements RepositoryInterface
 
     public function save(CurrencyState $currencyState): void
     {
+        throw new ReadOnlyException();
     }
 }

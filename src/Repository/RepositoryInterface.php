@@ -12,6 +12,7 @@ namespace TanukiCurrency\Repository;
 use TanukiCurrency\Entity\Currency;
 use TanukiCurrency\Entity\CurrencyState;
 use TanukiCurrency\Exception\CurrencyNotFoundException;
+use TanukiCurrency\Exception\ReadOnlyException;
 
 interface RepositoryInterface
 {
@@ -20,5 +21,8 @@ interface RepositoryInterface
      */
     public function find(Currency $currency): CurrencyState;
 
+    /**
+     * @throws ReadOnlyException
+     */
     public function save(CurrencyState $currencyState): void;
 }

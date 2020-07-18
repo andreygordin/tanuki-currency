@@ -9,9 +9,9 @@ declare(strict_types=1);
 
 namespace TanukiCurrency\Exception;
 
-use UnderflowException;
+use RuntimeException;
 
-class NoHandlersException extends UnderflowException
+class ReadOnlyException extends RuntimeException
 {
 
 }
